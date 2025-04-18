@@ -1,0 +1,36 @@
+module tb();
+
+    reg clk = 0, rst;
+
+    // Generate clock signal with a period of 100 time units
+    always begin
+        #50 clk = ~clk;
+    end
+
+    initial begin
+        // Reset sequence
+        rst <= 1'b0;
+        #200;
+        rst <= 1'b1;
+        #1000;
+        $finish;    
+    end
+
+    initial begin
+        // Initialize waveform dumping for simulation
+        $dumpfile("dump.vcd");
+        $dumpvars(0, dut); // Monitor all signals in the `Pipeline_top` instance
+    end
+
+    // Instantiate the pipeline top module
+    Pipeline_top dut (
+        .clk(clk), 
+        .rst(rst)
+    );
+
+    // Monitor key signals for debugging
+    initial begin
+        $monitor("Time: %0t | rst: %b | PC: %h | InstrD: %h | RegWriteW: %b | ResultW: %h", 
+                 $time, rst, dut.Fetch.PCD, dut.Fetch.InstrD, dut.WriteBack.RegWriteW, dut.WriteBack.ResultW);
+    end
+endmodule
